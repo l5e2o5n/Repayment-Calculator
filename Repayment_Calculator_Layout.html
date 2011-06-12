@@ -122,19 +122,25 @@ function calRepayment(str1,str2,str3,str4,str5)
 }
 
 $(document).ready(function(){
-  $("#button1").click(function(){
+
+  $("#loan_amout").val('600000');
+  var loan_amount=$("#loan_amout").val();
+ 
+ $("#button1").click(function(){
 	$("#placeholder").hide();
     $("#placeholder").slideDown();
   });
+  
+
 });
 </script>
 
 <script type="text/javascript">
 				function drawgraph(amount,mortgage,interest,frequency,rtype){
-					var payment=0,period=0,result1=[],result2=[];
 					
+					var plot;
 					$(function(){
-						
+						var payment=0,period=0,result1=[],result2=[];
 						if (frequency=="Weekly"){
 							period=52;
 						}
@@ -155,7 +161,7 @@ $(document).ready(function(){
 							if (rtype=="Principal & Interest"){
 								result1.push([i,Math.round(total_repayment-i*payment*period)]);
 							}
-							else if (rtype=="Interest Only"){
+							if (rtype=="Interest Only"){
 								result1.push([i,Math.round(interest_only_total_repayment-i*interest_only_payment*period)])}
 							}
 						
@@ -169,7 +175,7 @@ $(document).ready(function(){
 									result2.push([j/period,Math.round(a4)]);
 								}
 							}
-							else if (rtype=="Interest Only"){
+							if (rtype=="Interest Only"){
 								if (j%period==0){
 									result2.push([j/period,amount]);
 								}	
@@ -178,28 +184,45 @@ $(document).ready(function(){
 						
 						
 						
+						
 						plot=$.plot($("#placeholder"), 
 						[ {
 							data: result1,
 						    color: "#06f206",
-						   lines: {  show: true, fill: true } 
+						   lines: {  fill: true } 
 						   },
 						   {
 							   data: result2,
 							   color:"#028802",
-							   lines: {  show: true, fill: true } 
-						   }], { 
+							   lines: {   fill: true } 
+						   }
+						   ], 
+						   
+						   { 
 							series:{
-								lines: { show:true},
-								points: { show:false}
+								lines: { show:true}
 								},
-							crosshair: { mode: "x", lineWidth:3 },
-							grid: { hoverable: true, autoHighlight: false},
-							xaxis: { min: 0, tickDecimals:0},
-							yaxis: { min: 0, position:"right" } 
+
+							crosshair: { mode: "x", lineWidth:10 },
+							grid: { hoverable:true, autoHighlight: false},
+							//xaxis: { min: 0},
+							yaxis: { min: 0, 
+									position:"left" ,
+									tickFormatter: function(val,axis){
+														if(val>=1000000)
+															return (val/1000000).toFixed(2)+"M";
+														else if(val==0)
+															return val;
+														
+														else if(val>1000&val<1000000)
+															return (val/1000).toFixed(0)+"K";
+														else
+															return val;
+														
+														}
+									}
 							});
-							
-							
+					
 								
 						var legends = $("#placeholder.legendLabel");
     					legends.each(function () {
@@ -223,26 +246,15 @@ $(document).ready(function(){
         
 							var axes = plot.getAxes();
 
-        					if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
+        					//if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
 
-            				return;
-							//alert(axes.xaxis.max);
-			
+            				//return;
 							
-						}
-						
-						$("#placeholder").bind("plothover", function (event, pos, item) {
-							latestPosition = pos;
-							if (!updateLegendTimeout)
-            					updateLegendTimeout = setTimeout(updateLegend, 50);
 							
-							//var value1=result1[item.datapoint[0]][1];
-							//var value2=result2[item.datapoint[0]][1];
-														var value1=result1[Math.round(pos.x)][1];
+							var value1=result1[Math.round(pos.x)][1];
 							var value2=result2[Math.round(pos.x)][1];
 							var value3=mortgage-Math.round(pos.x);
-							var value3=mortgage-item.datapoint[0];
-							//alert(mortgage);
+							
 							if (value2<=0||value1<=0){
 								value1=1;
 								value2=1;}
@@ -259,6 +271,21 @@ $(document).ready(function(){
 								$("#_box").width(0);
 								}
 							$("#_remain_year").text(value3);
+						}
+						
+						
+						
+						
+						$("#placeholder").bind("plothover", function (event, pos, item) {
+							
+							latestPosition = pos;
+							   /*if (item) {
+									  highlight(item.series, item.datapoint);
+									  alert("You clicked a point!");
+									}*/
+							if (!updateLegendTimeout)
+            					updateLegendTimeout = setTimeout(updateLegend, 50);
+							
 						});
 						});
 					
@@ -283,7 +310,7 @@ $(document).ready(function(){
                     Loan amount:
                     </div>
                     <div id="_amount_box" style="float:right;">
-                    $&nbsp;<input type="text" class="input_detail" name="amount" size="13" value="50000" style="margin-right:59px; margin-top:10px;" />
+                    $&nbsp;<input id="loan_amout" type="text" class="input_detail" name="amount" size="13" style="margin-right:59px; margin-top:10px;" />
                     </div>
                 </div>
                 <div id="_mortgage">
@@ -356,7 +383,6 @@ $(document).ready(function(){
                 <div id="_box"></div>
                 </div>
             </div>
-            <div><span id="test_value_x"></span>,<span id="test_value_y"></span></div>
         </div>
 	</div>
 </body>
